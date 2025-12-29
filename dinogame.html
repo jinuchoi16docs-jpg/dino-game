@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dino Game</title>
+    <style>
+        body {
+            background: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid black;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game" width="800" height="200"></canvas>
+
+    <script>
+       const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let gameSpeed = 6;
+let gravity = 0.6;
+let score = 0;
+let gameOver = false;
+
+// Dino
+const dino = {
+  x: 50,
+  y: 150,
+  width: 40,
+  height: 40,
+  yVelocity: 0,
+  jumping: false
+};
+
+// Cactus
+let cactus = {
+  x: 800,
+  y: 150,
+  width: 20,
+  height: 40
+};
+
+// Jump function
+function jump() {
+  if (!dino.jumping) {
+    dino.yVelocity = -12;
+    dino.jumping = true;
+  }
+}
+
+// Keyboard or click controls
+document.addEventListener("keydown", jump);
+document.addEventListener("click", jump);
+function update() {
+    if (gameOver) return;
+
+    // Dino gravity
+    dino.yVelocity += gravity;
+    dino.y += dino.yVelocity;
+
+    if (dino.y >= 150) {
+        dino.y = 150;
+        dino.jumping = false;
+        dino.yVelocity = 0;
+    }
+
+    // Move cactus
+    cactus.x -= gameSpeed;
+    if (cactus.x < -cactus.width) {
+        cactus.x = 800;
+        score++;
+        gameSpeed += 0.2;
+    }
+
+    // Collision detection
+    if (
+        dino.x < cactus.x + cactus.width &&
+        dino.x + dino.width > cactus.x &&
+        dino.y < cactus.y + cactus.height &&
+        dino.y + dino.height > cactus.y
+    ) {
+        gameOver = true;
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Ground
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 190, canvas.width, 10);
+
+    // Dino
+    ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+
+    // Cactus
+    ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height);
+
+    // Score
+    ctx.font = "16px Arial";
+    ctx.fillText("Score: " + score, 10, 20);
+
+    // Game over
+    if (gameOver) {
+        ctx.font = "30px Arial";
+        ctx.fillText("GAME OVER", 300, 100);
+        ctx.font = "16px Arial";
+        ctx.fillText("Refresh to restart", 320, 130);
+    }
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+    </script>
+</body>
+</html>
